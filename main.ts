@@ -15,6 +15,8 @@ const png = readFileSync(new URL('./entry.png', import.meta.url));
 
 // Fail loudly here rather than hand the gate an image it would refuse.
 if (!png.subarray(0, 8).equals(PNG_SIGNATURE)) throw new Error('entry.png is not a PNG');
+// The gate takes only a whole PNG: a truncated file would lose its closing IEND chunk.
+if (png.subarray(png.length - 8, png.length - 4).toString('latin1') !== 'IEND') throw new Error('entry.png is truncated (no IEND)');
 if (png.length > MAX_BYTES) throw new Error(`entry.png is ${png.length} bytes, over ${MAX_BYTES}`);
 const width = png.readUInt32BE(16);
 const height = png.readUInt32BE(20);
